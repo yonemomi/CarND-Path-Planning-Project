@@ -1,8 +1,8 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
+
 ### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).  
+You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).
 
 To run the simulator on Mac/Linux, first make the binary file executable with the following command:
 ```shell
@@ -10,12 +10,45 @@ sudo chmod u+x {simulator_file_name}
 ```
 
 ### Goals
+
 In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
 
 #### The map of the highway is in data/highway_map.txt
+
 Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
 
 The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
+
+## Result
+
+The path planner enable the vehicle to drive with a maximum speed of 48 MPH along the highway for more than 10 minites. Whenver the vehicle sence the leading vehicle approaching, the ego vehicle can take action to slow down or changing lane. And the vehicle doesn't experience total acceleration over 10 m/s^2 and jerk.
+
+## Code
+
+My repository is here.
+https://github.com/yonemomi/CarND-Path-Planning-Project
+
+## Model Documentation
+
+My path planner is implemented in the `main.cpp`. The path planner consists of three parts.
+
+1. Prediction (`l102-l172`)
+2. Decision making (`l176-l213`)
+3. Trajectory generation (`l214-l336`)
+
+Basic idea is that the planner firstly understand surroundings of ego vehicle and understand whether or not it has available space to go. Next, it decides one action if it keeps lane or changes lane according to the surrounding situation. Finally it computes a trajectory that the ego vehicle can go or change lane smoothly.
+
+In the first part of prediction, the path planner set three statuses a) too_close which shows the ego vehcle is approaching to another vehcle preceding in the same lane  b) car_exist_left which shows the ego vehcle has a space to change left lane c) car_exist_right which shows the ego vehcle has a space to change right lane. To assign the status for all surrounding vehicles, I use the vehicles position and speed in Frenet coordinate stored in sensor fusion data. I check and assign the lane number of the vehicle belonging to by using d in Frenet coordinate(`l116-l123`).
+Moreover, I define the vehicle speed and s position in Frenet coordinate. Using this data, I devide the car existence into  the three cases (same lane, right side, left side in `l134-l173`). I assume that safe distance is 30m in forward and 20m in backword. In the checking process I check the range of the car existence from the ego vehicle using ego vehicle s (car_s) and another vehicle s (check_car_s).If another car is in the range, I assign the status. Then planner can have the information all other vehicle existense.
+
+In the second part of decision making process, the planner decides two things: lane number to go and velocity. The most important decision is whether or not a leading vehicle exist and is approaching to the ego vehicle because if there is not a leading vehicle the ego vehicle doesn't have to change lane and keep going. If a leading vehicle is closed to the ego vehicle, the planner decides slow down or changing lane to avoid collision. Changing lane is depending on the current lane, this limit lane can be changed. For example if the ego vehicles is in the number 0 lane (left lane), it can't go to left. So I divide into three lane cases when assigning (`l180-212`).
+Then planner can determine which lane to go and how fast the vehicle go.
+
+In the last part, trajectory is determined by combining previous trajectory and newly created trajectory by spline funciton. In initial case, planner doesn't have previous positioning data enough. Then I generate previous position and current position based on the current position and speed information(`l221-l245`). According to the Q&A discussion in the class room I use spline function to generate smooth trajectory. I use ideal s and d position in Frenet coordinate for each 30m, 60m, 90m (`l248-250`).
+Finally generated XY position in global coordinate go to simulator.
+
+## Reflection
+There was a lot of learning in this project. The hardest part of them is debugging with a simulator. Because the simulator is running in real time, I could not use gdb or other debuggers smoothly. Therefore, I decided to put out the result on the standard output and fix the bug, but I do not think it is a smart way. As a result, it was disappointing that I could not get much time and could not implement the Finite state machine or the original trajectory generation method. We hope to make these issues for the future.
 
 ## Basic Build Instructions
 
@@ -43,13 +76,13 @@ Here is the data provided from the Simulator to the C++ Program
 #### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+the path has processed since last time.
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-#### Previous path's end s and d values 
+#### Previous path's end s and d values
 
 ["end_path_s"] The previous list's last point's frenet s value
 
@@ -57,7 +90,7 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates.
 
 ## Details
 
@@ -87,7 +120,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```

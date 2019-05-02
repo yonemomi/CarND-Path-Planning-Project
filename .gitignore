@@ -1,0 +1,9 @@
+*.gch
+
+# build files
+build/
+
+# editor config
+.vscode/
+
+
