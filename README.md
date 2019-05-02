@@ -21,7 +21,8 @@ The highway's waypoints loop around so the frenet s value, distance along the ro
 
 ## Result
 
-The path planner enable the vehicle to drive with a maximum speed of 48 MPH along the highway for more than 10 minites. Whenver the vehicle sence the leading vehicle approaching, the ego vehicle can take action to slow down or changing lane. And the vehicle doesn't experience total acceleration over 10 m/s^2 and jerk.
+The path planner enable the vehicle to drive with a maximum speed of 49.5 MPH along the highway for more than 10 minites. Whenver the vehicle sence the leading vehicle approaching, the ego vehicle can take action to slow down or changing lane. And the vehicle doesn't experience total acceleration over 10 m/s^2 and jerk.
+![image](../pathplanning.png "image")
 
 ## Code
 
